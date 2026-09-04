@@ -1,18 +1,14 @@
 import type { Request, Response, NextFunction } from "express";
-import { auth } from "../modules/auth/auth.js";
+import { fromNodeHeaders } from "better-auth/node";
+import { auth } from "../modules/auth/auth";
 
-/**
- * Verifies the Better Auth session from the request headers/cookies.
- * On success, attaches `req.user` and `req.session` for downstream handlers.
- * On failure, returns 401 Unauthorized.
- */
 export const requireAuth = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const session = await auth.api.getSession({ headers: req.headers as Headers });
+    const session = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
 
     if (!session) {
       res.status(401).json({ message: "Unauthorized" });
@@ -27,10 +23,6 @@ export const requireAuth = async (
   }
 };
 
-/**
- * Requires the authenticated user to have the "admin" role.
- * Must be used after `requireAuth`.
- */
 export const requireAdmin = (
   req: Request,
   res: Response,

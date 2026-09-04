@@ -1,32 +1,46 @@
-import { prisma } from "../../config/db.js";
+import { prisma } from "../../config/db";
+import { HttpError } from "../../lib/errors";
 import type { Prisma } from "@prisma/client";
 
 export const getAllClubs = async () => {
-  // TODO: implement
-  return prisma.club.findMany();
+  return prisma.club.findMany({
+    include: { _count: { select: { hackathons: true } } },
+    orderBy: { createdAt: "desc" },
+  });
 };
 
 export const getClubById = async (id: string) => {
-  // TODO: implement (throw 404 if not found)
-  return prisma.club.findUnique({ where: { id } });
+  const club = await prisma.club.findUnique({
+    where: { id },
+    include: { hackathons: true },
+  });
+
+  if (!club) throw new HttpError(404, "Club not found");
+  return club;
 };
 
 export const createClub = async (
-  data: Prisma.ClubCreateInput
+  ownerId: string,
+  data: Pick<Prisma.ClubCreateInput, "name" | "description">
 ) => {
-  // TODO: implement
-  return prisma.club.create({ data });
+  return prisma.club.create({
+    data: { ...data, ownerId },
+  });
 };
 
 export const updateClub = async (
   id: string,
-  data: Prisma.ClubUpdateInput
+  data: Pick<Prisma.ClubUpdateInput, "name" | "description">
 ) => {
-  // TODO: implement (throw 404 if not found)
+  const club = await prisma.club.findUnique({ where: { id } });
+  if (!club) throw new HttpError(404, "Club not found");
+
   return prisma.club.update({ where: { id }, data });
 };
 
 export const deleteClub = async (id: string) => {
-  // TODO: implement (throw 404 if not found)
+  const club = await prisma.club.findUnique({ where: { id } });
+  if (!club) throw new HttpError(404, "Club not found");
+
   return prisma.club.delete({ where: { id } });
 };

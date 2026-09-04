@@ -1,11 +1,10 @@
 import type { RequestHandler } from "express";
-import * as hackathonService from "./hackathon.service.js";
+import * as hackathonService from "./hackathon.service";
 
 export const getHackathons: RequestHandler = async (req, res, next) => {
   try {
     const { clubId } = req.query as { clubId?: string };
-    const hackathons = await hackathonService.getAllHackathons(clubId);
-    res.json(hackathons);
+    res.json(await hackathonService.getAllHackathons(clubId));
   } catch (err) {
     next(err);
   }
@@ -13,12 +12,7 @@ export const getHackathons: RequestHandler = async (req, res, next) => {
 
 export const getHackathon: RequestHandler = async (req, res, next) => {
   try {
-    const hackathon = await hackathonService.getHackathonById(req.params.id);
-    if (!hackathon) {
-      res.status(404).json({ message: "Hackathon not found" });
-      return;
-    }
-    res.json(hackathon);
+    res.json(await hackathonService.getHackathonById(req.params.id as string));
   } catch (err) {
     next(err);
   }
@@ -33,13 +27,20 @@ export const createHackathon: RequestHandler = async (req, res, next) => {
       maxAttendees: number;
       clubId: string;
     };
+
+    if (!title?.trim() || !date || !maxAttendees || !clubId) {
+      res.status(400).json({ message: "title, date, maxAttendees, and clubId are required" });
+      return;
+    }
+
     const hackathon = await hackathonService.createHackathon({
       title,
       description,
       date: new Date(date),
-      maxAttendees,
-      club: { connect: { id: clubId } },
+      maxAttendees: Number(maxAttendees),
+      clubId,
     });
+
     res.status(201).json(hackathon);
   } catch (err) {
     next(err);
@@ -48,11 +49,21 @@ export const createHackathon: RequestHandler = async (req, res, next) => {
 
 export const updateHackathon: RequestHandler = async (req, res, next) => {
   try {
-    const hackathon = await hackathonService.updateHackathon(
-      req.params.id,
-      req.body as object
+    const { title, description, date, maxAttendees } = req.body as {
+      title?: string;
+      description?: string;
+      date?: string;
+      maxAttendees?: number;
+    };
+
+    res.json(
+      await hackathonService.updateHackathon(req.params.id as string, {
+        title,
+        description,
+        ...(date && { date: new Date(date) }),
+        ...(maxAttendees && { maxAttendees: Number(maxAttendees) }),
+      })
     );
-    res.json(hackathon);
   } catch (err) {
     next(err);
   }
@@ -60,8 +71,16 @@ export const updateHackathon: RequestHandler = async (req, res, next) => {
 
 export const deleteHackathon: RequestHandler = async (req, res, next) => {
   try {
-    await hackathonService.deleteHackathon(req.params.id);
+    await hackathonService.deleteHackathon(req.params.id as string);
     res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getHackathonAttendees: RequestHandler = async (req, res, next) => {
+  try {
+    res.json(await hackathonService.getHackathonRsvps(req.params.id as string));
   } catch (err) {
     next(err);
   }

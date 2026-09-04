@@ -1,10 +1,9 @@
 import { Router } from "express";
-import { requireAuth } from "../../middlewares/auth.middleware.js";
-import * as rsvpController from "./rsvp.controller.js";
+import { requireAuth } from "../../middlewares/auth.middleware";
+import * as rsvpController from "./rsvp.controller";
 
 const router = Router();
 
-// All RSVP routes require authentication
 router.use(requireAuth);
 
 router.post("/", rsvpController.createRsvp);

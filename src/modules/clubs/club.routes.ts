@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { requireAuth, requireAdmin } from "../../middlewares/auth.middleware.js";
-import * as clubController from "./club.controller.js";
+import { requireAuth, requireAdmin } from "../../middlewares/auth.middleware";
+import * as clubController from "./club.controller";
 
 const router = Router();
 
