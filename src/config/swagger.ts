@@ -1,4 +1,4 @@
-import type { Options } from "swagger-ui-express";
+import type { SwaggerUiOptions } from "swagger-ui-express";
 
 export const swaggerDocument = {
   openapi: "3.0.3",
@@ -304,9 +304,50 @@ export const swaggerDocument = {
         },
       },
     },
+    "/api/hackathons/{id}/rsvps": {
+      get: {
+        tags: ["Hackathons"],
+        summary: "List all attendees for a hackathon (Admin only)",
+        security: [{ cookieAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+        responses: {
+          200: {
+            description: "List of RSVPs with user info",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    allOf: [
+                      { $ref: "#/components/schemas/Rsvp" },
+                      {
+                        type: "object",
+                        properties: {
+                          user: {
+                            type: "object",
+                            properties: {
+                              id: { type: "string" },
+                              name: { type: "string" },
+                              email: { type: "string" },
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          401: { description: "Unauthorized" },
+          403: { description: "Forbidden – Admin only" },
+          404: { description: "Hackathon not found" },
+        },
+      },
+    },
   },
 };
 
-export const swaggerUiOptions: Options = {
+export const swaggerUiOptions: SwaggerUiOptions = {
   customSiteTitle: "Hackathon RSVP API Docs",
 };
