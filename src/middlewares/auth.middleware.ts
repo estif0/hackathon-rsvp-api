@@ -1,5 +1,4 @@
 import type { Request, Response, NextFunction } from "express";
-import "../types/express";
 import { fromNodeHeaders } from "better-auth/node";
 import { auth } from "../modules/auth/auth";
 
