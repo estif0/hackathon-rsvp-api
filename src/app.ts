@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import { toNodeHandler } from "better-auth/node";
+import "./types/express";
 
 import { auth } from "./modules/auth/auth";
 import { swaggerDocument, swaggerUiOptions } from "./config/swagger";
